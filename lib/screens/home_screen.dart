@@ -17,10 +17,14 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final DatabaseService _db = DatabaseService.instance;
   List<Transaction> _transactions = [];
+  List<Transaction> _filteredTransactions = [];
   List<Category> _categories = [];
   double _totalIncome = 0.0;
   double _totalExpense = 0.0;
   bool _isLoading = true;
+  String _searchQuery = '';
+  String? _selectedFilter;
+  int? _selectedCategoryFilter;
 
   @override
   void initState() {
@@ -58,6 +62,29 @@ class _HomeScreenState extends State<HomeScreen> {
     final transactions = await _db.getAllTransactions();
     setState(() {
       _transactions = transactions;
+      _applyFilters();
+    });
+  }
+
+  void _applyFilters() {
+    var filtered = _transactions;
+
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((t) {
+        return t.title.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    if (_selectedFilter != null) {
+      filtered = filtered.where((t) => t.type == _selectedFilter).toList();
+    }
+
+    if (_selectedCategoryFilter != null) {
+      filtered = filtered.where((t) => t.categoryId == _selectedCategoryFilter).toList();
+    }
+
+    setState(() {
+      _filteredTransactions = filtered;
     });
   }
 
@@ -88,6 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(l10n.appName),
         actions: [
           IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showFilterSheet(l10n),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _initializeData,
           ),
@@ -100,14 +131,24 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   _buildBalanceCard(context, balance, l10n),
+                  _buildSearchBar(l10n),
+                  if (_selectedFilter != null || _selectedCategoryFilter != null)
+                    _buildActiveFilters(),
                   Expanded(
-                    child: _transactions.isEmpty
-                        ? _buildEmptyState(l10n)
+                    child: _filteredTransactions.isEmpty
+                        ? _transactions.isEmpty
+                            ? _buildEmptyState(l10n)
+                            : Center(
+                                child: Text(
+                                  'Không tìm thấy giao dịch',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              )
                         : ListView.builder(
                             padding: const EdgeInsets.all(16),
-                            itemCount: _transactions.length,
+                            itemCount: _filteredTransactions.length,
                             itemBuilder: (context, index) {
-                              final transaction = _transactions[index];
+                              final transaction = _filteredTransactions[index];
                               final category = _getCategoryById(transaction.categoryId);
                               return _buildTransactionCard(transaction, category, l10n);
                             },
@@ -124,6 +165,185 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildSearchBar(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TextField(
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm giao dịch...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      _searchQuery = '';
+                      _applyFilters();
+                    });
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value;
+            _applyFilters();
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildActiveFilters() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Wrap(
+        spacing: 8,
+        children: [
+          if (_selectedFilter != null)
+            Chip(
+              label: Text(_selectedFilter == AppConstants.income ? 'Thu nhập' : 'Chi tiêu'),
+              onDeleted: () {
+                setState(() {
+                  _selectedFilter = null;
+                  _applyFilters();
+                });
+              },
+              backgroundColor: _selectedFilter == AppConstants.income
+                  ? AppTheme.incomeColor.withOpacity(0.2)
+                  : AppTheme.expenseColor.withOpacity(0.2),
+            ),
+          if (_selectedCategoryFilter != null)
+            Chip(
+              label: Text(_getCategoryById(_selectedCategoryFilter!)?.name ?? ''),
+              onDeleted: () {
+                setState(() {
+                  _selectedCategoryFilter = null;
+                  _applyFilters();
+                });
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterSheet(AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Lọc theo',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Loại giao dịch:', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      FilterChip(
+                        label: const Text('Tất cả'),
+                        selected: _selectedFilter == null,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedFilter = null;
+                            _applyFilters();
+                          });
+                          setModalState(() {});
+                        },
+                      ),
+                      FilterChip(
+                        label: Text(l10n.income),
+                        selected: _selectedFilter == AppConstants.income,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedFilter = selected ? AppConstants.income : null;
+                            _applyFilters();
+                          });
+                          setModalState(() {});
+                        },
+                      ),
+                      FilterChip(
+                        label: Text(l10n.expense),
+                        selected: _selectedFilter == AppConstants.expense,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedFilter = selected ? AppConstants.expense : null;
+                            _applyFilters();
+                          });
+                          setModalState(() {});
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Danh mục:', style: TextStyle(fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilterChip(
+                        label: const Text('Tất cả'),
+                        selected: _selectedCategoryFilter == null,
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategoryFilter = null;
+                            _applyFilters();
+                          });
+                          setModalState(() {});
+                        },
+                      ),
+                      ..._categories.map((cat) => FilterChip(
+                            label: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(cat.icon, size: 16, color: cat.color),
+                                const SizedBox(width: 4),
+                                Text(cat.name),
+                              ],
+                            ),
+                            selected: _selectedCategoryFilter == cat.id,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategoryFilter = selected ? cat.id : null;
+                                _applyFilters();
+                              });
+                              setModalState(() {});
+                            },
+                          )),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Đóng'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
