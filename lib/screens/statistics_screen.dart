@@ -110,6 +110,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   const SizedBox(height: 20),
                   _buildSummaryCards(l10n),
                   const SizedBox(height: 30),
+                  _buildBarChart(l10n),
+                  const SizedBox(height: 30),
                   _buildPieChart(l10n),
                   const SizedBox(height: 30),
                   _buildCategoryList(l10n),
@@ -273,6 +275,94 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   }).toList(),
                   sectionsSpace: 2,
                   centerSpaceRadius: 40,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBarChart(AppLocalizations l10n) {
+    if (_totalIncome == 0 && _totalExpense == 0) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Thu Chi So Sánh',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: (_totalIncome > _totalExpense ? _totalIncome : _totalExpense) * 1.2,
+                  barTouchData: BarTouchData(enabled: false),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          switch (value.toInt()) {
+                            case 0:
+                              return Text(l10n.income);
+                            case 1:
+                              return Text(l10n.expense);
+                            default:
+                              return const Text('');
+                          }
+                        },
+                      ),
+                    ),
+                    leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  gridData: const FlGridData(show: false),
+                  borderData: FlBorderData(show: false),
+                  barGroups: [
+                    BarChartGroupData(
+                      x: 0,
+                      barRods: [
+                        BarChartRodData(
+                          toY: _totalIncome,
+                          color: AppTheme.incomeColor,
+                          width: 60,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                      ],
+                    ),
+                    BarChartGroupData(
+                      x: 1,
+                      barRods: [
+                        BarChartRodData(
+                          toY: _totalExpense,
+                          color: AppTheme.expenseColor,
+                          width: 60,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

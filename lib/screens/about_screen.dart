@@ -59,7 +59,7 @@ class AboutScreen extends StatelessWidget {
             _buildInfoCard(
               context,
               title: 'Thành viên',
-              content: 'Vương Quang Quý\nMSSV: [Mã số sinh viên]',
+              content: 'Vương Quang Quý\nMSSV: 22010456\nEmail: 22010456@st.phenikaa-uni.edu.vn',
               icon: Icons.person,
             ),
             const SizedBox(height: 16),
@@ -67,7 +67,7 @@ class AboutScreen extends StatelessWidget {
               context,
               title: 'Mô tả',
               content:
-                  'Ứng dụng quản lý chi tiêu cá nhân giúp theo dõi thu chi, phân loại giao dịch và thống kê tài chính.',
+                  'Ứng dụng quản lý chi tiêu cá nhân giúp theo dõi thu chi, phân loại giao dịch và thống kê tài chính. Tính năng:\n• Theo dõi thu chi hàng ngày\n• Phân loại theo danh mục\n• Thống kê trực quan với biểu đồ\n• Hỗ trợ đa ngôn ngữ',
               icon: Icons.description,
             ),
             const SizedBox(height: 16),

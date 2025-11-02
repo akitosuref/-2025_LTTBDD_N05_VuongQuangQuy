@@ -95,28 +95,26 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                _buildBalanceCard(context, balance, l10n),
-                Expanded(
-                  child: _transactions.isEmpty
-                      ? Center(
-                          child: Text(
-                            l10n.noTransactions,
-                            style: Theme.of(context).textTheme.bodyLarge,
+          : RefreshIndicator(
+              onRefresh: _initializeData,
+              child: Column(
+                children: [
+                  _buildBalanceCard(context, balance, l10n),
+                  Expanded(
+                    child: _transactions.isEmpty
+                        ? _buildEmptyState(l10n)
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _transactions.length,
+                            itemBuilder: (context, index) {
+                              final transaction = _transactions[index];
+                              final category = _getCategoryById(transaction.categoryId);
+                              return _buildTransactionCard(transaction, category, l10n);
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: _transactions.length,
-                          itemBuilder: (context, index) {
-                            final transaction = _transactions[index];
-                            final category = _getCategoryById(transaction.categoryId);
-                            return _buildTransactionCard(transaction, category, l10n);
-                          },
-                        ),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -212,6 +210,56 @@ class _HomeScreenState extends State<HomeScreen> {
             color: color,
             fontSize: 18,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(AppLocalizations l10n) {
+    return ListView(
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 40),
+        Icon(
+          Icons.receipt_long,
+          size: 120,
+          color: Colors.grey[300],
+        ),
+        const SizedBox(height: 24),
+        Text(
+          l10n.noTransactions,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Bắt đầu theo dõi chi tiêu của bạn bằng cách thêm giao dịch đầu tiên',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 32),
+        Center(
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/add-transaction').then((_) {
+                _initializeData();
+              });
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Thêm giao dịch'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ),
       ],
