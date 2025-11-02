@@ -238,108 +238,116 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showFilterSheet(AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Lọc theo',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('Loại giao dịch:', style: TextStyle(fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
+            return DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  child: ListView(
+                    controller: scrollController,
                     children: [
-                      FilterChip(
-                        label: const Text('Tất cả'),
-                        selected: _selectedFilter == null,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedFilter = null;
-                            _applyFilters();
-                          });
-                          setModalState(() {});
-                        },
+                      const Text(
+                        'Lọc theo',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      FilterChip(
-                        label: Text(l10n.income),
-                        selected: _selectedFilter == AppConstants.income,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedFilter = selected ? AppConstants.income : null;
-                            _applyFilters();
-                          });
-                          setModalState(() {});
-                        },
-                      ),
-                      FilterChip(
-                        label: Text(l10n.expense),
-                        selected: _selectedFilter == AppConstants.expense,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedFilter = selected ? AppConstants.expense : null;
-                            _applyFilters();
-                          });
-                          setModalState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('Danh mục:', style: TextStyle(fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      FilterChip(
-                        label: const Text('Tất cả'),
-                        selected: _selectedCategoryFilter == null,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedCategoryFilter = null;
-                            _applyFilters();
-                          });
-                          setModalState(() {});
-                        },
-                      ),
-                      ..._categories.map((cat) => FilterChip(
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(cat.icon, size: 16, color: cat.color),
-                                const SizedBox(width: 4),
-                                Text(cat.name),
-                              ],
-                            ),
-                            selected: _selectedCategoryFilter == cat.id,
+                      const SizedBox(height: 16),
+                      const Text('Loại giao dịch:', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          FilterChip(
+                            label: const Text('Tất cả'),
+                            selected: _selectedFilter == null,
                             onSelected: (selected) {
                               setState(() {
-                                _selectedCategoryFilter = selected ? cat.id : null;
+                                _selectedFilter = null;
                                 _applyFilters();
                               });
                               setModalState(() {});
                             },
-                          )),
+                          ),
+                          FilterChip(
+                            label: Text(l10n.income),
+                            selected: _selectedFilter == AppConstants.income,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedFilter = selected ? AppConstants.income : null;
+                                _applyFilters();
+                              });
+                              setModalState(() {});
+                            },
+                          ),
+                          FilterChip(
+                            label: Text(l10n.expense),
+                            selected: _selectedFilter == AppConstants.expense,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedFilter = selected ? AppConstants.expense : null;
+                                _applyFilters();
+                              });
+                              setModalState(() {});
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text('Danh mục:', style: TextStyle(fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          FilterChip(
+                            label: const Text('Tất cả'),
+                            selected: _selectedCategoryFilter == null,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategoryFilter = null;
+                                _applyFilters();
+                              });
+                              setModalState(() {});
+                            },
+                          ),
+                          ..._categories.map((cat) => FilterChip(
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(cat.icon, size: 16, color: cat.color),
+                                    const SizedBox(width: 4),
+                                    Text(cat.name),
+                                  ],
+                                ),
+                                selected: _selectedCategoryFilter == cat.id,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    _selectedCategoryFilter = selected ? cat.id : null;
+                                    _applyFilters();
+                                  });
+                                  setModalState(() {});
+                                },
+                              )),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Đóng'),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Đóng'),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
