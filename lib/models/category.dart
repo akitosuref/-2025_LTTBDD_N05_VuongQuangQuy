@@ -20,7 +20,7 @@ class Category {
       'id': id,
       'name': name,
       'icon': icon.codePoint,
-      'color': color.value,
+      'color': color.toARGB32(),
       'type': type,
     };
   }

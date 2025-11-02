@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/transaction.dart';
+import '../models/transaction.dart' as models;
 import '../models/category.dart';
 
 class DatabaseService {
@@ -62,18 +62,18 @@ class DatabaseService {
     return result.map((map) => Category.fromMap(map)).toList();
   }
 
-  Future<int> insertTransaction(Transaction transaction) async {
+  Future<int> insertTransaction(models.Transaction transaction) async {
     final db = await database;
     return await db.insert('transactions', transaction.toMap());
   }
 
-  Future<List<Transaction>> getAllTransactions() async {
+  Future<List<models.Transaction>> getAllTransactions() async {
     final db = await database;
     final result = await db.query('transactions', orderBy: 'date DESC');
-    return result.map((map) => Transaction.fromMap(map)).toList();
+    return result.map((map) => models.Transaction.fromMap(map)).toList();
   }
 
-  Future<int> updateTransaction(Transaction transaction) async {
+  Future<int> updateTransaction(models.Transaction transaction) async {
     final db = await database;
     return await db.update(
       'transactions',
@@ -92,7 +92,7 @@ class DatabaseService {
     );
   }
 
-  Future<List<Transaction>> getTransactionsByDateRange(
+  Future<List<models.Transaction>> getTransactionsByDateRange(
       DateTime start, DateTime end) async {
     final db = await database;
     final result = await db.query(
@@ -101,7 +101,7 @@ class DatabaseService {
       whereArgs: [start.toIso8601String(), end.toIso8601String()],
       orderBy: 'date DESC',
     );
-    return result.map((map) => Transaction.fromMap(map)).toList();
+    return result.map((map) => models.Transaction.fromMap(map)).toList();
   }
 
   Future<double> getTotalByType(String type) async {
