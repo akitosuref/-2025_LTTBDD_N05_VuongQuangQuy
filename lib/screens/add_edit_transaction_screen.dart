@@ -5,7 +5,7 @@ import '../models/category.dart';
 import '../services/database_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 
 class AddEditTransactionScreen extends StatefulWidget {
   final Transaction? transaction;

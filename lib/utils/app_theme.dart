@@ -14,11 +14,11 @@ class AppTheme {
       brightness: Brightness.light,
     ),
     scaffoldBackgroundColor: backgroundColor,
-    cardTheme: const CardTheme(
+    cardTheme: CardThemeData(
       color: cardColor,
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.circular(12),
       ),
     ),
     appBarTheme: const AppBarTheme(
@@ -40,11 +40,11 @@ class AppTheme {
       brightness: Brightness.dark,
     ),
     scaffoldBackgroundColor: const Color(0xFF121212),
-    cardTheme: const CardTheme(
-      color: Color(0xFF1E1E1E),
+    cardTheme: CardThemeData(
+      color: const Color(0xFF1E1E1E),
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.circular(12),
       ),
     ),
     appBarTheme: const AppBarTheme(
