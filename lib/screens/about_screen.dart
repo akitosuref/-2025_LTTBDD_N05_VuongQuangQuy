@@ -59,7 +59,7 @@ class AboutScreen extends StatelessWidget {
             _buildInfoCard(
               context,
               title: 'Thành viên',
-              content: 'Vương Quang Quý\nMSSV: 22010456\nEmail: 22010456@st.phenikaa-uni.edu.vn',
+              content: 'Vương Quang Quý\nMSSV: 23010039\nEmail: 23010039@st.phenikaa-uni.edu.vn',
               icon: Icons.person,
             ),
             const SizedBox(height: 16),
